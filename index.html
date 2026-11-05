@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RutaPlaza · Modelo de negocio y tensiones</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--tx:#1d2320;--mu:#5d6862;--bd:#dcd8cc;--ac:#0f6b5c;--hi:#0f6b5c;--md:#c98a1b;--lo:#9aa39e;--rd:#b4442e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141816;--card:#1d2321;--tx:#ecefed;--mu:#9aa6a0;--bd:#323a37;--ac:#4cc3ab;--hi:#4cc3ab;--md:#e0a93f;--lo:#6c7771;--rd:#e8826b}}
+:root[data-theme="dark"]{--bg:#141816;--card:#1d2321;--tx:#ecefed;--mu:#9aa6a0;--bd:#323a37;--ac:#4cc3ab;--hi:#4cc3ab;--md:#e0a93f;--lo:#6c7771;--rd:#e8826b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 18px 60px}
+h1{font:700 clamp(30px,6vw,48px)/1.1 Georgia,serif;margin:8px 0 12px}
+h2{font:700 24px/1.2 Georgia,serif;margin:48px 0 6px}
+.lead{color:var(--mu);max-width:640px}
+.kick{color:var(--ac);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px}
+.card h3{margin:0 0 6px;font-size:15px}
+.card p,.card li{margin:0;color:var(--mu);font-size:14px}
+.card ul{margin:0;padding-left:18px}
+.num{font:700 30px Georgia,serif;color:var(--ac)}
+.stack{display:flex;height:44px;border-radius:10px;overflow:hidden;margin-top:14px;font-size:12px;font-weight:600;color:#fff}
+.stack div{display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.bar{display:grid;grid-template-columns:150px 1fr 28px;gap:10px;align-items:center;margin:9px 0;font-size:14px}
+.track{height:14px;background:var(--bd);border-radius:7px;overflow:hidden}
+.fill{height:100%;border-radius:7px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+button.chip{font:inherit;font-size:13px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:99px;padding:6px 12px;cursor:pointer}
+button.chip[aria-pressed="true"]{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.t{transition:opacity .2s}.t.off{opacity:.25}
+.vs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--tx)}
+.wrap{overflow-x:auto}
+@media (max-width:560px){.bar{grid-template-columns:110px 1fr 24px}}
+
+/* --- ESTILOS ADICIONALES PARA LOS ADR --- */
+.adr-badge { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:var(--ac); color:var(--bg); margin-left:8px; vertical-align:middle; letter-spacing:0.02em; }
+.adr-section { border:1px solid var(--bd); border-radius:8px; padding:12px 14px; margin-bottom:12px; background:var(--bg); }
+.adr-section.ctx { border-left:3px solid var(--ac); }
+.adr-kv { display:grid; grid-template-columns:120px 1fr; gap:6px 12px; font-size:14px; margin-bottom:8px; }
+.adr-kv .k { font-weight:700; color:var(--tx); }
+.adr-kv .v { color:var(--mu); }
+.opt-list { margin:0; padding-left:18px; font-size:14px; color:var(--mu); }
+.opt-list li { margin-bottom:8px; }
+.vd{display:inline-block;font-size:12px;font-weight:700;border-radius:99px;padding:1px 9px;margin-right:6px;color:#fff}.vd.ok{background:var(--hi)}.vd.no{background:var(--rd)}.vd.mid{background:var(--md)}.pt{border-left:5px solid var(--lo)}.pt.h4{border-left-color:var(--hi)}.pt.h3{border-left-color:var(--md)}.pt b{color:var(--tx)}
+</style>
+</head>
+<body>
+<main>
+<div class="kick">Ficha de proyecto</div>
+<h1>RutaPlaza</h1>
+<p class="lead">Una API reutilizable de almacenamiento (WMS básico) y planificación de patios. Vendemos un algoritmo confiable y rápido; el cliente lo adapta a su operación. Esta página muestra cómo se sostiene el negocio y dónde se tensionan sus decisiones.</p>
+
+<div class="grid">
+<div class="card"><h3>El cliente, en su voz</h3><p>“Tenemos un patio con 12 plazas de descarga y recibimos unos 80 camiones al día, entre las 6 a. m. y las 6 p. m., con el pico entre las 7 y las 10 de la mañana. Hoy los camiones esperan y se estorban entre sí. No queremos cambiar nuestros sistemas: queremos una API que nos diga a qué plaza y en qué franja va cada camión, que se ajuste sola cuando alguien llega tarde o una plaza queda fuera de servicio, y que baje la espera promedio en un 20 %. Y no puede caerse en plena hora pico.”</p></div>
+<div class="card"><h3>Tensión dominante</h3><p><b>En este sistema, la eficiencia de desempeño choca con la fiabilidad porque</b> garantizar que no se pierda ni se duplique ningún evento (colas persistentes, reintentos) añade tiempo y recursos a cada solicitud, mientras el webhook debe confirmar en ≤ 500 ms y la API replanificar en ≤ 2 s.</p></div>
+</div>
+
+<h2>1. El modelo de negocio</h2>
+<p class="lead">Proyecto a precio cerrado más una cuota mensual de soporte.</p>
+<div class="grid">
+<div class="card"><h3>Propuesta de valor</h3><p>Asignar camiones a plazas y franjas sin choques, replanificar ante imprevistos y reducir 20 % la espera promedio.</p></div>
+<div class="card"><h3>Cliente</h3><p>Operaciones con patio de descarga: ~80 camiones/día, 12 plazas, de 6 a. m. a 6 p. m.</p></div>
+<div class="card"><h3>Usuarios</h3><p>Directos: 5–10 despachadores por turno. Indirectos: conductores que reciben la asignación.</p></div>
+<div class="card"><h3>Canal</h3><p>API REST integrada como microservicio o dentro de un monolito por capas del cliente.</p></div>
+<div class="card"><h3>Fuera de alcance</h3><p>Compra o adecuación del predio y reemplazo de los sistemas actuales del cliente.</p></div>
+<div class="card"><h3>Ingresos</h3><p>Venta única ~150 M COP + soporte hasta 1,5 M COP/mes.</p></div>
+</div>
+
+<h2>2. La economía</h2>
+<p class="lead">Cifras en millones de COP. Los márgenes son cálculos derivados de la ficha.</p>
+<div class="grid">
+<div class="card"><div class="num">120</div><p>Costo base del proyecto (incluye 20 M de contingencia)</p></div>
+<div class="card"><div class="num">150</div><p>Valor de venta sugerido</p></div>
+<div class="card"><div class="num">30</div><p>Margen si se gasta toda la contingencia (20 % del precio)</p></div>
+<div class="card"><div class="num">18</div><p>Soporte máximo al año (1,5 × 12)</p></div>
+</div>
+<div class="stack" role="img" aria-label="Del precio de 150: 100 ejecución, 20 contingencia, 30 margen">
+<div style="width:66.7%;background:var(--hi)">Ejecución 100</div>
+<div style="width:13.3%;background:var(--md)">Conting. 20</div>
+<div style="width:20%;background:var(--rd)">Margen 30</div>
+</div>
+<p class="lead" style="margin-top:10px">Si la contingencia no se usa, el margen sube hasta 50 M. Pero con 4 meses y 3 personas, cualquier desvío de alcance se come ese colchón primero.</p>
+
+<h2>3. Dónde pusimos el esfuerzo</h2>
+<p class="lead">Presupuesto de puntos por atributo de calidad (ISO 25010). Total: 18 puntos, máximo 4 por atributo.</p>
+<div class="card" id="bars"></div>
+<div class="grid"><div class="card pt h1"><h3>Adecuación funcional · 1</h3><p>Somos una librería con casos de uso casi infinitos y solo ofrecemos un algoritmo reutilizable; la adecuación funcional debe venir de quienes la usen, no de nosotros.</p></div><div class="card pt h4"><h3>Eficiencia de desempeño · 4</h3><p>La API debe operar a su máximo rendimiento para calcular las mejores rutas.</p></div><div class="card pt h1"><h3>Compatibilidad · 1</h3><p>Se usará con un único protocolo, REST.</p></div><div class="card pt h1"><h3>Usabilidad · 1</h3><p>Solo se espera que la usen profesionales, no usuarios distintos.</p></div><div class="card pt h4"><h3>Fiabilidad · 4</h3><p>El sistema debe mantener los datos confiables y estar disponible en distintos escenarios.</p></div><div class="card pt h3"><h3>Seguridad · 3</h3><p>Queremos garantizar que personas externas no puedan acceder al sistema.</p></div><div class="card pt h3"><h3>Mantenibilidad · 3</h3><p>Queremos que la API pueda crecer (escalar) con el tiempo.</p></div><div class="card pt h1"><h3>Portabilidad · 1</h3><p>Como es una API, quien la use debe adaptarse a ella y no al revés.</p></div></div>
+<div class="card" style="margin-top:12px"><h3>Qué bajamos y qué riesgo aceptamos</h3><p>Para subir desempeño y fiabilidad a 4 bajamos a 1 la adecuación funcional, la compatibilidad, la usabilidad y la portabilidad. Aceptamos que el cliente tendrá que construir sobre la API lo específico de su operación, que un cliente que no hable REST necesitará un adaptador, que una integración o documentación difícil afectará a quien no sea profesional y que mover la API a otra plataforma costará más.</p></div>
+
+<h2>4. Las tensiones</h2>
+<p class="lead">Filtra por atributo para ver en qué conflictos participa. La dominante de RutaPlaza es Fiabilidad ↔ Eficiencia de desempeño.</p>
+<div class="chips" id="chips"></div>
+<div class="grid" id="tensions"></div>
+
+<h2>5. Decisiones Arquitectónicas (ADR - Bloque 2)</h2>
+<p class="lead">Registro de decisiones para los escenarios críticos. Se desarrollan hasta las alternativas evaluadas (estado Propuesto) a la espera de integrar tácticas.<br><b>Críticos elegidos: E1, E2 y E3.</b> Son los dos atributos con 4 puntos (desempeño y fiabilidad) y mantenibilidad (3), y en los tres cumplir la medida cuesta otro atributo importante. Los atributos con 1 punto no son críticos porque quien usa la API se adapta a ella.</p>
+
+<!-- ADR 01: Rendimiento -->
+<div class="card">
+    <h3 style="font-size:18px; color:var(--ac); margin-bottom:12px;">ADR-01: Gestión de picos de carga en el Webhook</h3>
+    
+    <div class="adr-section">
+        <strong>Estado:</strong> Propuesto <span class="adr-badge">Bloque 2</span>
+    </div>
+    
+    <div class="adr-section ctx">
+        <strong>Context (Escenario de Rendimiento)</strong> <span class="adr-badge">Bloque 2</span>
+        <div class="adr-kv" style="margin-top:8px;">
+            <div class="k">Atributo</div><div class="v">Eficiencia de desempeño</div>
+            <div class="k">Fuente</div><div class="v">Saturación de recepción de carga.</div>
+            <div class="k">Estímulo</div><div class="v">Alta temporada de entrada y salida de carga por tanto el sistema presenta ralentización y fallos.</div>
+            <div class="k">Artefacto</div><div class="v">Lectura de Datos.</div>
+            <div class="k">Entorno</div><div class="v">Durante los meses previos a temporadas navideñas.</div>
+            <div class="k">Respuesta</div><div class="v">La API usa webhook para garantizar la integración, procesando la inserción de datos sin abusar de recursos y aprovechando periodos de baja demanda.</div>
+            <div class="k">Medida</div><div class="v">Carga pico de 20 sol/min (doble del normal) por 3h: lectura p95 &le; 800ms, p99 &le; 2s; confirmación webhook &le; 500ms; proc. sostenido 20 evt/min sin degradación; error &le; 1%; 0 perdidos; CPU &le; 70%, RAM &le; 80%.</div>
+            <div class="k">Otro atributo que toca</div><div class="v">Fiabilidad (la medida exige 0 eventos perdidos).</div>
+            <div class="k">¿Es crítico?</div><div class="v">Sí. Eficiencia de desempeño tiene 4 puntos y la opción que mejor la cumple cuesta mantenibilidad y compatibilidad.</div>
+        </div>
+    </div>
+    
+    <div class="adr-section">
+        <strong>Opciones consideradas</strong> <span class="adr-badge">Bloque 2</span>
+        <ul class="opt-list" style="margin-top:8px;">
+            <li><strong>A · Procesamiento síncrono con base de datos en clúster.</strong><br>
+            Gana: Arquitectura simple sin componentes adicionales.<br>Paga: Eficiencia de desempeño (el tiempo de respuesta del webhook dependerá de la BD, arriesgando la medida de confirmación &le; 500ms).<br>
+            <span class="vd no">No cumple la medida</span>Porque bajo picos el tiempo de respuesta se degradará superando los 500ms exigidos.<br>
+            <em>Decisión que encierra:</em> Favorece la simplicidad operativa de la infraestructura sacrificando el rendimiento en picos.</li>
+            <li><strong>B · Cola de mensajes externa (ej. Broker Pub/Sub) y Workers asíncronos.</strong><br>
+            Gana: Confirmación ultrarrápida al webhook, aislando los picos de carga.<br>Paga: Mantenibilidad y Compatibilidad (introduce un nuevo punto de fallo y mayor complejidad de despliegue).<br>
+            <span class="vd ok">Cumple la medida</span>Porque aislar la recepción de los datos garantiza que el webhook responda en menos de 500ms.<br>
+            <em>Decisión que encierra:</em> Favorece el rendimiento técnico trasladando la carga financiera al costo operativo de mantener un broker en la nube.</li>
+            <li><strong>C · Inserción en memoria (Buffer) y volcado periódico (Batching).</strong><br>
+            Gana: Menor consumo de conexiones a base de datos.<br>Paga: Fiabilidad (si el sistema se reinicia antes del volcado, se incumpliría la métrica de 0 eventos perdidos).<br>
+            <span class="vd mid">Cumple parcialmente</span>Cumple en velocidad pero falla en la métrica de 0 eventos perdidos si hay una caída repentina.<br>
+            <em>Decisión que encierra:</em> Favorece la economía de recursos asumiendo un riesgo inaceptable sobre los datos del cliente.</li>
+        </ul>
+        <div style="margin-top:12px; font-size:14px; color:var(--mu);"><strong>Lo que nos falta saber para elegir en el Bloque 3:</strong> Necesitamos definir si el presupuesto de 120 M soporta los costos recurrentes de infraestructura (nube) que implican las colas de mensajes.</div>
+    </div>
+</div>
+
+<!-- ADR 02: Fiabilidad -->
+<div class="card">
+    <h3 style="font-size:18px; color:var(--ac); margin-bottom:12px;">ADR-02: Persistencia de eventos ante caída del servicio</h3>
+    
+    <div class="adr-section">
+        <strong>Estado:</strong> Propuesto <span class="adr-badge">Bloque 2</span>
+    </div>
+    
+    <div class="adr-section ctx">
+        <strong>Context (Escenario de Fiabilidad)</strong> <span class="adr-badge">Bloque 2</span>
+        <div class="adr-kv" style="margin-top:8px;">
+            <div class="k">Atributo</div><div class="v">Fiabilidad</div>
+            <div class="k">Fuente</div><div class="v">Falla del servicio que aloja la API.</div>
+            <div class="k">Estímulo</div><div class="v">En plena hora pico de llegada de camiones, el servicio se cae o se reinicia mientras el webhook sigue recibiendo eventos.</div>
+            <div class="k">Artefacto</div><div class="v">Módulo de recepción de eventos (webhook).</div>
+            <div class="k">Entorno</div><div class="v">Apagón, en horario laboral de 6 am a 5 pm.</div>
+            <div class="k">Respuesta</div><div class="v">Guarda en cola persistente para no perderlos, se recupera automáticamente, procesa sin duplicarlos (ID único), sigue entregando el último plan válido y notifica la actualización al volver.</div>
+            <div class="k">Medida</div><div class="v">0 perdidos; 0 duplicados procesados; recup. automática &le; 60s; disp. &ge; 99.5% en horario operativo; &ge; 99% de reintentos exitosos en máx 3 intentos.</div>
+            <div class="k">Otro atributo que toca</div><div class="v">Eficiencia de desempeño (persistir y reintentar añade tiempo a cada evento).</div>
+            <div class="k">¿Es crítico?</div><div class="v">Sí. Fiabilidad tiene 4 puntos y garantizar 0 perdidos cuesta dinero, seguridad y desempeño.</div>
+        </div>
+    </div>
+    
+    <div class="adr-section">
+        <strong>Opciones consideradas</strong> <span class="adr-badge">Bloque 2</span>
+        <ul class="opt-list" style="margin-top:8px;">
+            <li><strong>A · Almacenamiento local temporal (Log en disco) en el nodo.</strong><br>
+            Gana: Fiabilidad básica sin acoplamiento a servicios de terceros.<br>Paga: Portabilidad y Fiabilidad estricta (si el nodo físico se destruye o cambia de instancia en la nube, los eventos en disco se pierden).<br>
+            <span class="vd mid">Cumple parcialmente</span>Si la instancia se destruye físicamente no cumple el margen de 0 eventos perdidos.<br>
+            <em>Decisión que encierra:</em> Traslada el riesgo de pérdida a la estabilidad física del nodo que aloja la API.</li>
+            <li><strong>B · Delegación de reintentos al cliente (Failing Fast).</strong><br>
+            Gana: Eficiencia de desempeño y mantenibilidad al no gestionar colas internamente.<br>Paga: Adecuación funcional y Usabilidad (se obliga al sistema origen a hacerse cargo del buffer, violando la premisa de 0 eventos perdidos por parte nuestra).<br>
+            <span class="vd no">No cumple la medida</span>Porque viola explícitamente nuestra premisa de 0 eventos perdidos.<br>
+            <em>Decisión que encierra:</em> Traslada la complejidad operativa y la responsabilidad técnica del reintento al cliente.</li>
+            <li><strong>C · Broker de mensajería externo con persistencia nativa garantizada.</strong><br>
+            Gana: Recuperación automática delegada y garantía de orden/no duplicación.<br>Paga: Costo operativo y Seguridad (mayor superficie de ataque al exponer un nuevo canal de comunicación).<br>
+            <span class="vd ok">Cumple la medida</span>Los brokers están diseñados para garantizar los 0 perdidos, 0 duplicados y recuperación inmediata.<br>
+            <em>Decisión que encierra:</em> Favorece la resiliencia y fiabilidad extrema trasladando el costo a licenciamiento o servicios administrados adicionales.</li>
+        </ul>
+        <div style="margin-top:12px; font-size:14px; color:var(--mu);"><strong>Lo que nos falta saber para elegir en el Bloque 3:</strong> Necesitamos saber si las políticas de seguridad del cliente permiten desplegar y exponer un canal de mensajería externo en su red.</div>
+    </div>
+</div>
+
+<!-- ADR 03: Mantenibilidad -->
+<div class="card">
+    <h3 style="font-size:18px; color:var(--ac); margin-bottom:12px;">ADR-03: Desacoplamiento de reglas de patio</h3>
+    
+    <div class="adr-section">
+        <strong>Estado:</strong> Propuesto <span class="adr-badge">Bloque 2</span>
+    </div>
+    
+    <div class="adr-section ctx">
+        <strong>Context (Escenario de Mantenibilidad)</strong> <span class="adr-badge">Bloque 2</span>
+        <div class="adr-kv" style="margin-top:8px;">
+            <div class="k">Atributo</div><div class="v">Mantenibilidad</div>
+            <div class="k">Fuente</div><div class="v">Cliente que ajusta la operación del predio.</div>
+            <div class="k">Estímulo</div><div class="v">Se agrega una nueva plaza de descarga y una nueva regla (ej. material que solo puede descargarse en ciertas plazas y horarios).</div>
+            <div class="k">Artefacto</div><div class="v">Módulos de asignación y validación de reglas de patio.</div>
+            <div class="k">Entorno</div><div class="v">Tiempo de desarrollo y actualización.</div>
+            <div class="k">Respuesta</div><div class="v">Se modifica el código aislando el impacto, ejecutando pruebas automáticas para confirmar que la lógica existente no se rompió.</div>
+            <div class="k">Medida</div><div class="v">Cambio completado en &le; 2 días; modifica &le; 2 módulos; 100% de pruebas pasan (0 regresiones) + nuevas pruebas; cobertura &ge; 80%; despliegue en &le; 1 hora sin inactividad.</div>
+            <div class="k">Otro atributo que toca</div><div class="v">Eficiencia de desempeño y fiabilidad (leer reglas externas añade latencia y puede corromper la asignación).</div>
+            <div class="k">¿Es crítico?</div><div class="v">Sí. Mantenibilidad tiene 3 puntos y las opciones que más la favorecen cuestan desempeño o fiabilidad, que valen 4.</div>
+        </div>
+    </div>
+    
+    <div class="adr-section">
+        <strong>Opciones consideradas</strong> <span class="adr-badge">Bloque 2</span>
+        <ul class="opt-list" style="margin-top:8px;">
+            <li><strong>A · Patrón Strategy incrustado en código (Reglas inyectadas).</strong><br>
+            Gana: Alta cohesión y control absoluto mediante pruebas unitarias en código (asegura el 100% de pruebas sin regresiones).<br>Paga: Cada nueva regla requiere un ciclo completo de CI/CD para el despliegue de la API completa.<br>
+            <span class="vd no">No cumple la medida</span>Porque a largo plazo cada regla nueva requeriría tocar código fuente y dificultaría cumplir el despliegue en ≤ 1 hora.<br>
+            <em>Decisión que encierra:</em> Mantiene el control total en el equipo de desarrollo, trasladando la lentitud del proceso al cliente.</li>
+            <li><strong>B · Motor de reglas de negocio externo (Business Rules Engine).</strong><br>
+            Gana: Mantenibilidad superlativa (las reglas se cambian sin tocar el código fuente, eliminando tiempos de despliegue).<br>Paga: Eficiencia de desempeño (evaluar políticas vía red añade latencia constante por cada camión asignado).<br>
+            <span class="vd ok">Cumple la medida</span>Cumple con la rapidez de los cambios, asumiendo el impacto moderado en la latencia.<br>
+            <em>Decisión que encierra:</em> Favorece la agilidad operativa del negocio asumiendo un costo técnico en rendimiento (latencia).</li>
+            <li><strong>C · Tablas paramétricas en Base de Datos leídas en caliente.</strong><br>
+            Gana: Flexibilidad para configurar horarios/plazas desde una interfaz externa.<br>Paga: Seguridad y Fiabilidad (las configuraciones erróneas en base de datos pueden eludir las pruebas automáticas exigidas en la métrica y corromper la asignación).<br>
+            <span class="vd mid">Cumple parcialmente</span>Depende de cuán estrictas sean las validaciones de negocio implementadas antes de guardar los datos en las tablas.<br>
+            <em>Decisión que encierra:</em> Favorece una solución de bajo costo y fácil implementación, sacrificando la seguridad contra errores humanos al configurar.</li>
+        </ul>
+        <div style="margin-top:12px; font-size:14px; color:var(--mu);"><strong>Lo que nos falta saber para elegir en el Bloque 3:</strong> Conocer con qué frecuencia real el cliente ajusta estas políticas para evaluar si la complejidad del motor de reglas vale la pena.</div>
+    </div>
+</div>
+
+</main>
+<script>
+const attrs=[["Adecuación funcional",1],["Eficiencia de desempeño",4],["Compatibilidad",1],["Usabilidad",1],["Fiabilidad",4],["Seguridad",3],["Mantenibilidad",3],["Portabilidad",1]];
+const col=v=>v==4?"var(--hi)":v==3?"var(--md)":"var(--lo)";
+document.getElementById("bars").innerHTML=attrs.map(([n,v])=>`<div class="bar"><span>${n}</span><div class="track"><div class="fill" style="width:${v*25}%;background:${col(v)}"></div></div><b>${v}</b></div>`).join("");
+const T=[
+  ["Seguridad", "Usabilidad", "Más controles de seguridad (autenticación, validaciones) añaden fricción a la experiencia del usuario.", "Ejemplo: Un límite estricto de intentos de login reduce el riesgo de fuerza bruta, pero bloquea a usuarios legítimos que se equivocan de contraseña."],
+  ["Seguridad", "Eficiencia de desempeño", "El cifrado, la validación de tokens y las verificaciones de autorización consumen tiempo de procesamiento en cada solicitud.", "Ejemplo: Validar una firma criptográfica en cada transacción añade latencia medible bajo alta concurrencia."],
+  ["Eficiencia de desempeño", "Mantenibilidad", "Las optimizaciones de bajo nivel (caché manual, código especializado) suelen sacrificar claridad y modularidad.", "Ejemplo: Una consulta SQL optimizada manualmente con hints específicos del motor es más rápida pero más frágil ante cambios."],
+  ["Eficiencia de desempeño", "Portabilidad", "Optimizar para una plataforma específica reduce la capacidad de ejecutar el sistema en otros entornos.", "Ejemplo: Usar instrucciones específicas de un procesador mejora el desempeño pero ata el sistema a esa arquitectura."],
+  ["Fiabilidad", "Eficiencia de desempeño", "Los mecanismos de tolerancia a fallos (reintentos, redundancia, replicación) consumen recursos y tiempo adicional.", "Ejemplo: Escribir en dos réplicas antes de confirmar una transacción aumenta la fiabilidad pero añade latencia."],
+  ["Seguridad", "Mantenibilidad", "Los controles de seguridad añaden capas y validaciones que incrementan la complejidad del código.", "Ejemplo: Un sistema de permisos granular es más seguro pero más difícil de modificar sin introducir huecos."],
+  ["Compatibilidad", "Seguridad", "Ampliar la interoperabilidad expone más puntos de integración, y cada uno es una superficie de ataque potencial.", "Ejemplo: Exponer una API pública para integrarse con terceros multiplica los vectores de ataque posibles."],
+  ["Usabilidad", "Eficiencia de desempeño", "Las confirmaciones y validaciones que protegen al usuario de errores añaden pasos y tiempo a la interacción.", "Ejemplo: Pedir confirmación explícita antes de una transferencia grande añade fricción, no solo protección."],
+  ["Mantenibilidad", "Fiabilidad", "Un sistema modular es más fácil de diagnosticar y aislar cuando falla, lo que favorece la fiabilidad.", "Ejemplo: Separar servicios por responsabilidad permite que la falla de uno no derribe a los demás."],
+  ["Mantenibilidad", "Portabilidad", "El desacoplamiento que exige la mantenibilidad también facilita adaptar el sistema a nuevos entornos.", "Ejemplo: Aislar el acceso a datos detrás de una interfaz permite tanto cambiarlo fácilmente como portarlo a otro motor de base de datos."],
+  ["Compatibilidad", "Mantenibilidad", "Diseñar con estándares de interoperabilidad suele forzar interfaces más limpias y desacopladas.", "Ejemplo: Adoptar un estándar como HL7/FHIR obliga a definir contratos claros entre módulos, lo que también facilita mantenerlos."],
+  ["Adecuación funcional", "Mantenibilidad", "Agregar funciones sin refactorizar acumula complejidad y degrada la mantenibilidad con el tiempo.", "Ejemplo: Cada regla de negocio añadida directamente al mismo método, sin reestructurar, lo hace cada vez más difícil de modificar."],
+  ["Adecuación funcional", "Eficiencia de desempeño", "Cubrir más casos de uso y validaciones amplía el código que se ejecuta en cada solicitud, lo que puede afectar el tiempo de respuesta.", "Ejemplo: Agregar validaciones exhaustivas a cada campo de un formulario para cubrir todos los casos posibles añade procesamiento en cada envío."],
+  ["Adecuación funcional", "Usabilidad", "Cuantas más funciones expone un sistema, más difícil es mantener una interfaz simple y fácil de aprender.", "Ejemplo: Un formulario con 40 campos porque el sistema soporta todos los casos posibles resulta abrumador de usar."],
+  ["Adecuación funcional", "Seguridad", "Cada función adicional expuesta es una superficie potencial de explotación.", "Ejemplo: Un endpoint adicional para exportar datos masivamente añade valor funcional, pero también un vector de fuga de datos si no se protege igual de bien que el resto."],
+  ["Adecuación funcional", "Portabilidad", "Las funciones muy específicas de una plataforma reducen la capacidad de portar el sistema a otros entornos.", "Ejemplo: Una función que usa notificaciones push nativas de un sistema operativo ata esa función a esa plataforma."],
+  ["Eficiencia de desempeño", "Compatibilidad", "Traducir información entre formatos o protocolos estándar para interoperar añade procesamiento frente a un formato propio optimizado.", "Ejemplo: Convertir cada mensaje a un formato estándar como XML añade tiempo de procesamiento frente a un formato binario propio."],
+  ["Compatibilidad", "Fiabilidad", "Depender de sistemas externos para interoperar introduce puntos de falla adicionales fuera del control propio.", "Ejemplo: Si el sistema de pagos externo con el que se integra cae, la interoperabilidad se convierte en un punto de fallo para toda la transacción."],
+  ["Compatibilidad", "Portabilidad", "Adoptar estándares abiertos de interoperabilidad suele apoyarse en las mismas abstracciones que facilitan portar el sistema a otros entornos.", "Ejemplo: Adoptar un estándar como HL7/FHIR no solo permite intercambiar información con otros sistemas, sino que también facilita migrar el propio sistema a otra plataforma que soporte el mismo estándar."],
+  ["Usabilidad", "Portabilidad", "Mantener una buena experiencia en cada plataforma exige adaptar la interfaz a sus particularidades, lo que tensiona con reutilizar el mismo código en todas partes.", "Ejemplo: Una interfaz que se siente natural en escritorio puede no ser usable en móvil sin adaptaciones específicas, lo que complica portar el mismo código a ambos."],
+  ["Fiabilidad", "Seguridad", "Ante una falla, priorizar disponibilidad puede llevar a 'fallar abierto', mientras que la seguridad exige 'fallar cerrado'.", "Ejemplo: Si el servicio de autenticación cae, ¿el sistema deja pasar a todos para no interrumpir el servicio, o bloquea a todos para no arriesgar un acceso indebido?"],
+  ["Seguridad", "Portabilidad", "Los mecanismos de seguridad que dependen de un proveedor o plataforma específica reducen la portabilidad del sistema.", "Ejemplo: Usar el almacenamiento seguro nativo de un sistema operativo específico para guardar credenciales ata esa función a esa plataforma."]
+];
+const tags=[...new Set(T.flatMap(t=>[t[0],t[1]]))];
+let sel=null;
+const chips=document.getElementById("chips"),box=document.getElementById("tensions");
+box.innerHTML=T.map(t=>`<div class="card t"><div class="vs"><span class="tag">${t[0]}</span><span class="tag">↔</span><span class="tag">${t[1]}</span></div><h3>${t[2]}</h3><p>${t[3]}</p></div>`).join("");
+function draw(){chips.innerHTML=tags.map(g=>`<button class="chip" aria-pressed="${sel===g}" data-g="${g}">${g}</button>`).join("");
+[...box.children].forEach((c,i)=>c.classList.toggle("off",sel&&!T[i].slice(0,2).includes(sel)));
+chips.querySelectorAll("button").forEach(b=>b.onclick=()=>{sel=sel===b.dataset.g?null:b.dataset.g;draw()})}
+draw();
+</script>
+</body>
+</html>
